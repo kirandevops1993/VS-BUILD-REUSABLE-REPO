@@ -1,4 +1,3 @@
-
 name: Visual Studio Build Reusable Workflow
 
 on:
@@ -19,12 +18,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Full Visual Studio 2022
+      - name: Install Full Visual Studio 2022 with Required Workloads
         run: |
-          choco install visualstudio2022buildtools --params "--add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools --add Microsoft.VisualStudio.Workload.NetCoreBuildTools --quiet --norestart"
+          choco install visualstudio2022buildtools --params "--add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools --add Microsoft.VisualStudio.Workload.NetCoreBuildTools --add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
+
+      - name: Install .NET SDK (Latest)
+        run: |
+          choco install dotnet-sdk --version=8.0.100 -y
+          echo "DOTNET_ROOT=C:\Program Files\dotnet" >> $GITHUB_ENV
+          echo "C:\Program Files\dotnet" >> $GITHUB_PATH
+
+      - name: Verify .NET SDK Installation
+        run: dotnet --info
 
       - name: Restore NuGet Packages
-        run: nuget restore ${{ inputs.solution_path }}
+        run: dotnet restore ${{ inputs.solution_path }}
 
       - name: Build Solution using Visual Studio
         run: |
