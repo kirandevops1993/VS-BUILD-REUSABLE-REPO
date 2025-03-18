@@ -13,26 +13,19 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # Visual Studio runs only on Windows
+    runs-on: windows-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Install Full Visual Studio 2022 with Required Workloads
         run: |
-          choco install visualstudio2022buildtools --params "--add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools --add Microsoft.VisualStudio.Workload.NetCoreBuildTools --add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
-
-      - name: Install .NET SDK (Latest)
-        run: |
-          choco install dotnet-sdk --version=8.0.100 -y
-          echo "DOTNET_ROOT=C:\Program Files\dotnet" >> $GITHUB_ENV
-          echo "C:\Program Files\dotnet" >> $GITHUB_PATH
-
-      - name: Verify .NET SDK Installation
-        run: dotnet --info
-
+          choco install visualstudio2022enterprise --params "--add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools --add Microsoft.VisualStudio.Workload.NetCoreBuildTools --add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
+      
       - name: Restore NuGet Packages
-        run: dotnet restore ${{ inputs.solution_path }}
+        run: nuget restore "${{ inputs.solution_path }}"
 
       - name: Build Solution using Visual Studio
-        run: cmd.exe /c ""\"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe\"" \"${{ inputs.solution_path }}\" /Build \"${{ inputs.build_configuration }}\""
+        shell: cmd
+        run: |
+          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.com" "${{ inputs.solution_path }}" /Build "${{ inputs.build_configuration }}"
